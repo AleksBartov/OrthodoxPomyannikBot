@@ -1,10 +1,14 @@
 {
   "name": "orthodoxpomyannikbot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "type": "module",
+  "description": "Телеграм бот для помощи священникам в молитвенном поминовении",
+  "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --env-file=.env src/app.js",
+    "dev": "node --watch --env-file=.env src/app.js",
+    "db:init": "node --env-file=.env src/scripts/init-db.js",
+    "db:migrate": "node --env-file=.env src/scripts/migrate.js"
   },
   "repository": {
     "type": "git",
