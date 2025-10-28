@@ -1,22 +1,52 @@
-import { Telegraf } from "telegraf";
-import { setupStartHandler } from "../handlers/start.js";
-import { setupAddPersonHandler } from "../handlers/addPerson.js";
-import { setupListPersonsHandler } from "../handlers/listPersons.js"; // ← ДОБАВЛЯЕМ
+import { Telegraf } from 'telegraf';
+import { setupListPersonsHandler } from '../handlers/listPersons.js'; // ПЕРВЫМ!
+import { setupStartHandler } from '../handlers/start.js';
+import { setupAddPersonHandler } from '../handlers/addPerson.js';
 
 export class PrayerBot {
-  constructor(token) {
-    this.bot = new Telegraf(token);
-    this.setupHandlers();
-  }
+    constructor(token) {
+        this.bot = new Telegraf(token);
+        this.setupGlobalLogging();
+        this.setupHandlers();
+    }
 
-  setupHandlers() {
-    setupStartHandler(this.bot);
-    setupAddPersonHandler(this.bot);
-    setupListPersonsHandler(this.bot); // ← ДОБАВЛЯЕМ
-  }
+    setupGlobalLogging() {
+        this.bot.use(async (ctx, next) => {
+            console.log('📨 Входящее сообщение:', {
+                userId: ctx.from?.id,
+                text: ctx.message?.text,
+                command: ctx.message?.entities?.[0]?.type === 'bot_command' ? 'COMMAND' : 'TEXT'
+            });
+            await next();
+        });
+    }
 
-  launch() {
-    this.bot.launch();
-    console.log("🤖 Prayer Bot запущен");
-  }
+    setupHandlers() {
+        console.log('🔧 Настройка обработчиков...');
+        
+        try {
+            // Загружаем listPersons ПЕРВЫМ чтобы его команды имели приоритет
+            console.log('🔄 Загрузка listPersons.js...');
+            setupListPersonsHandler(this.bot);
+            console.log('✅ listPersons.js загружен');
+            
+            console.log('🔄 Загрузка start.js...');
+            setupStartHandler(this.bot);
+            console.log('✅ start.js загружен');
+            
+            console.log('🔄 Загрузка addPerson.js...');
+            setupAddPersonHandler(this.bot);
+            console.log('✅ addPerson.js загружен');
+            
+        } catch (error) {
+            console.error('❌ Ошибка загрузки обработчиков:', error);
+        }
+        
+        console.log('✅ Все обработчики настроены');
+    }
+
+    launch() {
+        this.bot.launch();
+        console.log('🤖 Prayer Bot запущен');
+    }
 }
