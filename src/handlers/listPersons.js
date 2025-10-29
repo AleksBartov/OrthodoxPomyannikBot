@@ -42,6 +42,15 @@ export function setupListPersonsHandler(bot) {
         }
     });
 
+    // В конец setupListPersonsHandler добавляем:
+bot.hears('✏️ Редактировать', async (ctx) => {
+    console.log('✏️ Кнопка "Редактировать" нажата!');
+    // Вызываем команду edit
+    ctx.message.text = '/edit';
+    return bot.handleUpdate(ctx.update);
+});
+
+
     console.log('✅ Обработчики зарегистрированы');
 }
 

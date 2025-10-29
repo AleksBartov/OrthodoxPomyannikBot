@@ -1,9 +1,11 @@
+
 import { Markup } from 'telegraf';
 
 export function getMainKeyboard() {
     return Markup.keyboard([
         ['➕ Добавить поминаемого', '📖 Список поминаемых'],
-        ['🔔 Напоминания', '⚙️ Настройки']
+        ['✏️ Редактировать', '🔔 Напоминания'],
+        ['⚙️ Настройки']
     ]).resize();
 }
 
@@ -139,4 +141,45 @@ export function getListNavigationKeyboard(currentPage, totalPages) {
     keyboard.push([Markup.button.callback('❌ Закрыть список', 'list_close')]);
     
     return Markup.inlineKeyboard(keyboard);
+}
+
+// КЛАВИАТУРЫ ДЛЯ РЕДАКТИРОВАНИЯ
+export function getEditPersonKeyboard(persons) {
+    const keyboard = persons.map(person => [
+        Markup.button.callback(
+            `${person.type === 'live' ? '🕯' : '✝️'} ${person.name}`,
+            `edit_${person.id}`
+        )
+    ]);
+    
+    keyboard.push([Markup.button.callback('⬅️ Назад', 'edit_back')]);
+    
+    return Markup.inlineKeyboard(keyboard);
+}
+
+export function getEditFieldKeyboard(field, personId) {
+    const keyboard = [
+        [
+            Markup.button.callback('📝 Имя', `editfield_${personId}_name`),
+            Markup.button.callback('💬 Пометки', `editfield_${personId}_notes`)
+        ],
+        [
+            Markup.button.callback('📅 Даты', `editfield_${personId}_dates`),
+            Markup.button.callback('📋 Архивировать', `editfield_${personId}_archive`)
+        ],
+        [
+            Markup.button.callback('⬅️ Назад', `edit_${personId}`)
+        ]
+    ];
+    
+    return Markup.inlineKeyboard(keyboard);
+}
+
+export function getConfirmationKeyboard(action, personId) {
+    return Markup.inlineKeyboard([
+        [
+            Markup.button.callback('✅ Да', `confirm_${action}_${personId}`),
+            Markup.button.callback('❌ Нет', `confirm_cancel_${personId}`)
+        ]
+    ]);
 }

@@ -1,7 +1,8 @@
 import { Telegraf } from 'telegraf';
-import { setupListPersonsHandler } from '../handlers/listPersons.js'; // ПЕРВЫМ!
+import { setupListPersonsHandler } from '../handlers/listPersons.js';
 import { setupStartHandler } from '../handlers/start.js';
 import { setupAddPersonHandler } from '../handlers/addPerson.js';
+import { setupEditPersonHandler } from '../handlers/editPerson.js'; // НОВЫЙ ИМПОРТ
 
 export class PrayerBot {
     constructor(token) {
@@ -37,6 +38,11 @@ export class PrayerBot {
             console.log('🔄 Загрузка addPerson.js...');
             setupAddPersonHandler(this.bot);
             console.log('✅ addPerson.js загружен');
+            
+            // НОВЫЙ ОБРАБОТЧИК
+            console.log('🔄 Загрузка editPerson.js...');
+            setupEditPersonHandler(this.bot);
+            console.log('✅ editPerson.js загружен');
             
         } catch (error) {
             console.error('❌ Ошибка загрузки обработчиков:', error);

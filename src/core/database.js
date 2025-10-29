@@ -32,7 +32,7 @@ class Database {
             )
         `);
 
-        // Таблица для поминаемых
+        // Таблица для поминаемых - ОБНОВЛЯЕМ с is_active
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS persons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +46,7 @@ class Database {
                 birth_date DATE,
                 death_date DATE,
                 notes TEXT,
+                is_active BOOLEAN DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (priest_id) REFERENCES priests (id)
             )
@@ -55,6 +56,11 @@ class Database {
         this.db.exec(`
             CREATE INDEX IF NOT EXISTS idx_persons_priest_id 
             ON persons(priest_id)
+        `);
+
+        this.db.exec(`
+            CREATE INDEX IF NOT EXISTS idx_persons_active 
+            ON persons(priest_id, is_active)
         `);
 
         console.log('✅ База данных инициализирована');

@@ -1,3 +1,4 @@
+
 import database from '../core/database.js';
 
 export class UserService {
@@ -26,14 +27,63 @@ export class UserService {
         } : null;
     }
 
-    async getPriestPersons(priestId) {
+    async getPriestPersons(priestId, activeOnly = true) {
+        const whereClause = activeOnly ? 'WHERE priest_id = ? AND is_active = 1' : 'WHERE priest_id = ?';
         const stmt = this.db.prepare(`
             SELECT * FROM persons 
-            WHERE priest_id = ?
+            ${whereClause}
             ORDER BY created_at DESC
         `);
         
         return stmt.all(priestId);
+    }
+
+    async getPersonById(personId, priestId) {
+        const stmt = this.db.prepare(`
+            SELECT * FROM persons 
+            WHERE id = ? AND priest_id = ?
+        `);
+        
+        return stmt.get(personId, priestId);
+    }
+
+    async updatePerson(personId, priestId, updates) {
+        const allowedFields = ['name', 'type', 'gender', 'role_type', 'church_role', 'name_day', 'birth_date', 'death_date', 'notes', 'is_active'];
+        const updateFields = [];
+        const values = [];
+        
+        Object.keys(updates).forEach(key => {
+            if (allowedFields.includes(key)) {
+                updateFields.push(`${key} = ?`);
+                values.push(updates[key]);
+            }
+        });
+        
+        if (updateFields.length === 0) {
+            throw new Error('Нет полей для обновления');
+        }
+        
+        values.push(personId, priestId);
+        
+        const stmt = this.db.prepare(`
+            UPDATE persons 
+            SET ${updateFields.join(', ')}
+            WHERE id = ? AND priest_id = ?
+        `);
+        
+        const result = stmt.run(...values);
+        return result.changes > 0;
+    }
+
+    async archivePerson(personId, priestId) {
+        const stmt = this.db.prepare(`
+            UPDATE persons 
+            SET is_active = 0
+            WHERE id = ? AND priest_id = ?
+        `);
+        
+        const result = stmt.run(personId, priestId);
+        return result.changes > 0;
     }
 
     // НОВЫЙ МЕТОД: получение статистики
@@ -43,7 +93,7 @@ export class UserService {
                 type,
                 COUNT(*) as count
             FROM persons 
-            WHERE priest_id = ?
+            WHERE priest_id = ? AND is_active = 1
             GROUP BY type
         `);
         
